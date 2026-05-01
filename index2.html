@@ -2,104 +2,109 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>CODEZILLA | Matrix Terminal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+    <title>CODEZILLA | HACKER EDITION</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            background-color: #000;
-            color: #0f0;
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            margin: 0; background: #000; color: #0f0;
+            font-family: 'Consolas', monospace; overflow: hidden;
         }
 
-        /* شريط العنوان */
-        #top-bar {
-            background: #111;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #0f0;
-            box-shadow: 0 0 15px #0f0;
-            z-index: 10;
+        /* الهيكل الرئيسي */
+        .container { display: flex; height: 100vh; flex-direction: column; }
+        
+        /* شريط التحكم */
+        .toolbar {
+            background: #111; padding: 10px; border-bottom: 2px solid #0f0;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .title {
-            font-size: 1.8em;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            animation: glitch 2s infinite;
+        .logo { font-weight: bold; font-size: 20px; text-shadow: 0 0 10px #0f0; }
+
+        .btn-run {
+            background: #0f0; color: #000; border: none; padding: 10px 25px;
+            cursor: pointer; font-weight: bold; border-radius: 4px;
         }
 
-        /* منطقة العمل */
-        #main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
+        .btn-run:hover { background: #0a0; box-shadow: 0 0 15px #0f0; }
+
+        /* منطقة التكويد */
+        .workspace { display: flex; flex: 1; }
+        
+        textarea {
+            width: 50%; height: 100%; background: #050505; color: #0f0;
+            border: none; padding: 20px; font-size: 16px; outline: none;
+            resize: none; border-right: 1px solid #222;
+            font-family: 'Consolas', 'Courier New', monospace;
         }
 
-        .editor-section {
-            flex: 1;
-            border-right: 1px solid #0f0;
-            position: relative;
-        }
-
-        /* تخصيص شكل المحرر */
-        .CodeMirror {
-            height: 100% !important;
-            font-size: 16px;
-            background: rgba(0, 0, 0, 0.9) !important;
-        }
-
-        /* نافذة النتائج */
-        #preview-section {
-            width: 40%;
-            display: flex;
-            flex-direction: column;
-            background: #050505;
-        }
-
-        .terminal-header {
-            background: #0f0;
-            color: #000;
-            padding: 5px 10px;
-            font-weight: bold;
-            font-size: 0.8em;
-        }
-
+        /* نافذة العرض والـ Terminal */
+        .output-zone { width: 50%; display: flex; flex-direction: column; background: #fff; }
+        
         #terminal {
-            flex: 1;
-            padding: 15px;
-            color: #0f0;
-            overflow-y: auto;
-            font-family: 'Consolas', monospace;
-            line-height: 1.5;
+            height: 40%; background: #000; color: #0f0; 
+            padding: 15px; overflow-y: auto; font-size: 14px;
+            border-top: 2px solid #0f0;
         }
 
-        /* أزرار الأوامر */
-        .run-btn {
-            background: #000;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 25px;
-            cursor: pointer;
-            font-family: 'Courier New';
-            font-weight: bold;
-            transition: 0.3s;
-        }
+        iframe { flex: 1; border: none; width: 100%; background: #fff; }
 
-        .run-btn:hover {
-            background: #0f0;
-            color: #000;
-            box-shadow: 0 0 20px #0f0;
-        }
+        .label { background: #222; color: #0f0; padding: 5px 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
 
-        /* تأثير الجليتش */
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 red, -2px 0 blue; }
-            50% { text-shadow: -2px 0 red,
+<div class="container">
+    <div class="toolbar">
+        <div class="logo">CODEZILLA://SYSTEM_v3</div>
+        <button class="btn-run" onclick="runProject()">RUN_CODE [F5]</button>
+    </div>
+
+    <div class="workspace">
+        <textarea id="editor" placeholder="اكتب كود HTML أو JavaScript هنا..." spellcheck="false">
+<h1>Hello Codezilla</h1>
+<script>
+  console.log("تم تشغيل النظام بنجاح...");
+  document.body.style.background = "#000";
+  document.body.style.color = "#0f0";
+</script>
+
+<style>
+  h1 { text-align: center; margin-top: 50px; text-shadow: 0 0 10px #0f0; }
+</style>
+        </textarea>
+
+        <div class="output-zone">
+            <div class="label">LIVE_PREVIEW</div>
+            <iframe id="viewer"></iframe>
+            <div class="label">SYSTEM_TERMINAL</div>
+            <div id="terminal">// المخرجات تظهر هنا...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function runProject() {
+        const code = document.getElementById('editor').value;
+        const terminal = document.getElementById('terminal');
+        const viewer = document.getElementById('viewer').contentWindow.document;
+
+        // مسح الـ Terminal عند كل تشغيل
+        terminal.innerHTML = "Initializing...<br>";
+
+        try {
+            // 1. حقن الكود داخل الـ iframe للمعاينة
+            viewer.open();
+            viewer.write(code);
+            viewer.close();
+
+            // 2. محاكاة الـ Console.log ليعمل داخل الـ Terminal الخاص بنا
+            const iframeWindow = document.getElementById('viewer').contentWindow;
+            iframeWindow.console.log = function(message) {
+                terminal.innerHTML += `<span style="color:#0f0;">[LOG]: ${message}</span><br>`;
+            };
+            
+            terminal.innerHTML += "<span style='color:cyan;'>[SYSTEM]: Execution Complete.</span><br>";
+
+        } catch (err) {
+            terminal.innerHTML += `<span style="color:red;">[ERROR]: ${err.message}
