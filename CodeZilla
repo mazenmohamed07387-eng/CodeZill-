@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeZilla | Dev Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-main: #00ff41;
+            --neon-glow: rgba(0, 255, 65, 0.6);
+            --bg-dark: #020202;
+            --panel-bg: rgba(15, 15, 15, 0.95);
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--neon-main);
+            font-family: 'Fira Code', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* تأثير الخلفية المتطورة */
+        body::before {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        header {
+            padding: 15px 30px;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--neon-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 25px var(--neon-glow);
+        }
+
+        .logo-area { text-align: left; }
+        .logo { 
+            font-family: 'Orbitron'; font-size: 28px; font-weight: 900; 
+            letter-spacing: 5px; text-shadow: 0 0 15px var(--neon-main);
+        }
+        .dev-tag { font-size: 10px; color: #555; margin-top: 5px; }
+
+        .designer-info { text-align: right; border-right: 3px solid var(--neon-main); padding-right: 15px; }
+        .designer-name { font-weight: bold; color: #fff; font-size: 14px; }
+
+        .main-layout { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        /* المحرر */
+        #editor-container { flex: 1; border-left: 1px solid #222; }
+
+        /* منطقة الأوامر والنتائج */
+        #terminal-side {
+            width: 350px;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #222;
+        }
+
+        .actions { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        select, button {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--neon-main);
+            color: var(--neon-main);
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s ease;
+        }
+
+        button.run-btn {
+            background: var(--neon-main);
+            color: #000;
+            font-weight: 900;
+            font-size: 16px;
+            box-shadow: 0 0 15px var(--neon-glow);
+        }
+
+        button.run-btn:hover { background: #fff; box-shadow: 0 0 30px #fff; }
+
+        .output-box {
+            flex: 1;
+            padding: 15px;
+            font-size: 13px;
+            overflow-y: auto;
+            border-top: 1px solid #222;
+            background: rgba(0,0,0,0.8);
+            line-height: 1.6;
+        }
+
+        .status-bar { padding: 5px 15px; font-size: 10px; background: #111; color: #444; border-top: 1px solid #222; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-main); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <div class="logo">CODEZILLA</div>
+        <div class="dev-tag">V3.0 DEVELOPMENT ENVIRONMENT</div>
+    </div>
+    <div class="designer-info">
+        <div style="font-size: 10px; opacity: 0.6;">LEAD DEVELOPER</div>
+        <div class="designer-name">Mazen Mohamed</div>
+    </div>
+</header>
+
+<div class="main-layout">
+    <div id="terminal-side">
+        <div class="actions">
+            <label style="font-size: 12px;">SELECT_LANGUAGE:</label>
+            <select id="langSelect">
+                <option value="python">Python 3</option>
+                <option value="javascript">JavaScript (Node)</option>
+                <option value="cpp">C++ 17</option>
+            </select>
+            <button class="run-btn" id="runBtn">EXECUTE_CORE()</button>
+            <button onclick="clearTerminal()" style="border-color: #444; color: #666; font-size: 10px;">CLEAR_LOGS</button>
+        </div>
+        <div class="output-box" id="output">
+            <span style="color: #444;">> System initialized...</span><br>
+            <span style="color: #444;">> Ready for input, Master Mazen.</span>
+        </div>
+    </div>
+    <div id="editor-container"></div>
+</div>
+
+<div class="status-bar">
+    STATUS: ONLINE | ENCRYPTION: AES-256 | REGION: EGYPT_SERVER
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+<script>
+    let editor;
+    const outputElement = document.getElementById('output');
+
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        editor = monaco.editor.create(document.getElementById('editor-container'), {
+            value: "print('Welcome to CodeZilla, Mazen Mohamed!')\n# Start coding here...",
+            language: 'python',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 18,
+            fontFamily: 'Fira Code',
+            renderLineHighlight: 'all',
+            cursorSmoothCaretAnimation: true
+        });
+    });
+
+    document.getElementById('runBtn').addEventListener('click', executeProcess);
+
+    async function executeProcess() {
+        const code = editor.getValue();
+        const lang = document.getElementById('langSelect').value;
+        
+        logToTerminal(`> Initiating ${lang.toUpperCase()} sequence...`, '#aaa');
+
+        try {
+            // استخدام محرك معالجة متقدم يدعم الموبايل بشكل أفضل
+            const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    "language": lang,
+                    "version": "*",
+                    "files": [{ "content": code }]
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.run && data.run.output !== undefined) {
+                const res = data.run.output || "Execution finished with no output.";
+                logToTerminal(res, '#fff');
+            } else {
+                logToTerminal("> ERROR: " + (data.message || "Unknown System Failure"), "#ff0000");
+            }
+        } catch (error) {
+            logToTerminal("> CONNECTION_FAILED: تأكد من فتح الموقع عبر رابط وليس كملف محلي.", "#ff0000");
+        }
+    }
+
+    function logToTerminal(text, color) {
+        const line = document.createElement('div');
+        line.style.color = color;
+        line.style.marginBottom = "5px";
+        line.innerText = text;
+        outputElement.appendChild(line);
+        outputElement.scrollTop = outputElement.scrollHeight;
+    }
+
+    function clearTerminal() {
+        outputElement.innerHTML = '<span style="color: #444;">> Terminal cleared.</span>';
+    }
+</script>
+</body>
+</html>
