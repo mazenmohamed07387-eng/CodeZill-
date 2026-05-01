@@ -2,181 +2,104 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codezilla | محرر الأكواد الاحترافي</title>
-    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/editor/editor.main.min.css">
+    <title>CODEZILLA | Matrix Terminal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
     <style>
-        :root {
-            --hacker-green: #00ff41;
-            --dark-bg: #0a0a0a;
-            --panel-bg: #151515;
+        body {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: var(--dark-bg);
-            color: var(--hacker-green);
-            font-family: 'Courier New', Courier, monospace;
+        /* شريط العنوان */
+        #top-bar {
+            background: #111;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0f0;
+            box-shadow: 0 0 15px #0f0;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 1.8em;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            animation: glitch 2s infinite;
+        }
+
+        /* منطقة العمل */
+        #main-container {
+            display: flex;
+            flex: 1;
             overflow: hidden;
         }
 
-        /* رأس الصفحة */
-        header {
-            height: 50px;
-            background: var(--panel-bg);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--hacker-green);
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px var(--hacker-green);
-        }
-
-        /* منطقة المحرر */
-        #container {
-            display: flex;
-            height: calc(100vh - 50px);
-            width: 100%;
-        }
-
-        #editor {
+        .editor-section {
             flex: 1;
-            border-right: 1px solid #333;
+            border-right: 1px solid #0f0;
+            position: relative;
         }
 
-        /* منطقة النتائج (Terminal) */
-        #output-panel {
-            width: 35%;
-            background: #000;
+        /* تخصيص شكل المحرر */
+        .CodeMirror {
+            height: 100% !important;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.9) !important;
+        }
+
+        /* نافذة النتائج */
+        #preview-section {
+            width: 40%;
             display: flex;
             flex-direction: column;
+            background: #050505;
         }
 
-        .panel-header {
-            background: #222;
-            padding: 5px 15px;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
+        .terminal-header {
+            background: #0f0;
+            color: #000;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 0.8em;
         }
 
-        #output {
+        #terminal {
             flex: 1;
             padding: 15px;
-            font-family: 'Consolas', monospace;
-            white-space: pre-wrap;
-            color: #fff;
+            color: #0f0;
             overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            line-height: 1.5;
         }
 
-        /* أزرار التحكم */
-        .btn-run {
-            background: transparent;
-            color: var(--hacker-green);
-            border: 1px solid var(--hacker-green);
-            padding: 5px 20px;
+        /* أزرار الأوامر */
+        .run-btn {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 25px;
             cursor: pointer;
+            font-family: 'Courier New';
             font-weight: bold;
             transition: 0.3s;
         }
 
-        .btn-run:hover {
-            background: var(--hacker-green);
+        .run-btn:hover {
+            background: #0f0;
             color: #000;
-            box-shadow: 0 0 15px var(--hacker-green);
+            box-shadow: 0 0 20px #0f0;
         }
 
-        /* تأثيرات الهاكر */
-        .matrix-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; opacity: 0.05;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <div class="logo">CODEZILLA_SYS >_</div>
-    <div class="controls">
-        <select id="language" style="background:#000; color:#00ff41; border:1px solid #00ff41;">
-            <option value="javascript">JavaScript</option>
-            <option value="html">HTML/CSS Preview</option>
-            <option value="python">Python (Logic Only)</option>
-        </select>
-        <button class="btn-run" onclick="executeCode()">RUN_SCRIPT</button>
-    </div>
-</header>
-
-<div id="container">
-    <div id="editor"></div>
-    <div id="output-panel">
-        <div class="panel-header">
-            <span>TERMINAL_OUTPUT</span>
-            <span id="status" style="color: gray;">READY</span>
-        </div>
-        <div id="output">// النتائج ستظهر هنا...</div>
-    </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-<script>
-    let editor;
-
-    // تهيئة المحرر
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
-    require(['vs/editor/editor.main'], function() {
-        editor = monaco.editor.create(document.getElementById('editor'), {
-            value: "// Codezilla محررك الجديد\nconsole.log('Hello Codezilla World!');",
-            language: 'javascript',
-            theme: 'vs-dark',
-            automaticLayout: true,
-            fontSize: 16,
-            cursorSmoothCaretAnimation: true,
-            mouseWheelZoom: true
-        });
-    });
-
-    // وظيفة التشغيل
-    function executeCode() {
-        const output = document.getElementById('output');
-        const lang = document.getElementById('language').value;
-        const code = editor.getValue();
-        const status = document.getElementById('status');
-
-        output.innerHTML = ""; 
-        status.innerText = "EXECUTING...";
-        status.style.color = "yellow";
-
-        try {
-            if (lang === 'javascript') {
-                // إعادة توجيه console.log للعرض في الـ Terminal الخاص بنا
-                const originalLog = console.log;
-                console.log = (msg) => { output.innerHTML += `> ${msg}\n`; };
-                eval(code);
-                console.log = originalLog;
-            } else if (lang === 'html') {
-                const win = window.open();
-                win.document.write(code);
-                output.innerHTML = "> تم فتح المعاينة في نافذة جديدة.";
-            } else {
-                output.innerHTML = `> لغة ${lang} تتطلب سيرفر تشغيل، لكن الكود مكتوب بشكل صحيح.`;
-            }
-            status.innerText = "SUCCESS";
-            status.style.color = "#00ff41";
-        } catch (err) {
-            output.innerHTML = `<span style="color: red;">ERROR: ${err.message}</span>`;
-            status.innerText = "FAILED";
-            status.style.color = "red";
-        }
-    }
-</script>
-
-</body>
-</html>
+        /* تأثير الجليتش */
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 red, -2px 0 blue; }
+            50% { text-shadow: -2px 0 red,
